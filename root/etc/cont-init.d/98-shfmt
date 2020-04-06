@@ -1,0 +1,32 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** installing shfmt ****"
+
+# check latest version
+AVAILABLE_SHFMT=$( (curl -fsL "https://api.github.com/repos/mvdan/sh/releases/latest" | grep -Po '"tag_name": "[Vv]?\K.*?(?=")') || echo "0")
+if [[ ${AVAILABLE_SHFMT} == "0" ]]; then
+    echo "The latest available version of shfmt could not be confirmed. This is usually caused by exhausting the rate limit on GitHub's API. Please check https://api.github.com/rate_limit"
+    exit 1
+fi
+
+# check CPU architecture
+if [[ ${ARCH} == "aarch64" ]]; then
+    SHFMT_ARCH="shfmt_v${AVAILABLE_SHFMT}_linux_arm" # shfmt does not build for arm64, but the arm32 binary should work
+fi
+if [[ ${ARCH} == "armv7l" ]]; then
+    SHFMT_ARCH="shfmt_v${AVAILABLE_SHFMT}_linux_arm"
+fi
+if [[ ${ARCH} == "x86_64" ]]; then
+    SHFMT_ARCH="shfmt_v${AVAILABLE_SHFMT}_linux_amd64"
+fi
+
+# install binary
+curl -fsL "https://github.com/mvdan/sh/releases/download/${AVAILABLE_SHFMT}/${SHFMT_ARCH}" -o /usr/local/bin/shfmt
+chmod +x /usr/local/bin/shfmt || true
+
+# verify install
+INSTALLED_SHFMT=$( (/usr/local/bin/shfmt --version 2> /dev/null || echo "0") | sed -E 's/.* version ([^,]*)(, build .*)?/\1/')
+if [[ ${INSTALLED_SHFMT} == "0" ]]; then
+    echo "Failed to install the latest shfmt."
+    exit 1
+fi
