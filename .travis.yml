@@ -4,16 +4,16 @@ language: shell
 
 branches:
   only:
-    - letsencrypt-imagemagick
+    - swag-ffmpeg
 
 services:
   - docker
 
 env:
   global:
-    - DOCKERHUB="linuxserver/mods"
-    - BASEIMAGE="letsencrypt"
-    - MODNAME="imagemagick"
+    - DOCKERHUB="sanmadjack/linuxserver-mods"
+    - BASEIMAGE="swag"
+    - MODNAME="ffmpeg"
 
 jobs:
   include:
